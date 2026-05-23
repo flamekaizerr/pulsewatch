@@ -40,3 +40,7 @@ sqlite.db
 shared/*.js
 shared/*.js.map
 shared/*.d.ts
+
+# Internal tracking and context
+PROGRESS.md
+graphify-out/
