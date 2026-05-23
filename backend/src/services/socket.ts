@@ -1,13 +1,16 @@
 import { Server as HttpServer } from 'http';
 import { Server as SocketServer } from 'socket.io';
-import { PingLog, MonitorStatus } from '@shared/types.js';
+import { isOriginAllowed } from '../config/cors';
+import type { PingLog, MonitorStatus } from '@shared/types';
 
 let io: SocketServer | null = null;
 
 export const initSocket = (server: HttpServer): SocketServer => {
   io = new SocketServer(server, {
     cors: {
-      origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+      origin: (origin, callback) => {
+        return callback(null, isOriginAllowed(origin));
+      },
       methods: ['GET', 'POST'],
       credentials: true,
     },

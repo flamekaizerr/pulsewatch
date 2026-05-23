@@ -1,6 +1,6 @@
 import { createServer } from 'http';
-import app from './app.js';
-import { initSocket } from './services/socket.js';
+import app from './app';
+import { initSocket } from './services/socket';
 
 const PORT = process.env.PORT || 4000;
 const server = createServer(app);

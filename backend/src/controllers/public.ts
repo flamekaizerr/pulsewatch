@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import { prisma } from '../config/database.js';
-import { cache } from '../config/redis.js';
-import { runUptimeCheck, pruneOldPingLogs } from '../services/pinger.js';
-import { MonitorStatus } from '@shared/types';
+import { prisma } from '../config/database';
+import { cache } from '../config/redis';
+import { runDueUptimeChecks } from '../services/pinger';
+import type { MonitorStatus } from '@shared/types';
 
 const CRON_SECRET = process.env.CRON_SECRET || 'dev_cron_secret_change_later';
 
@@ -83,29 +83,11 @@ export const runScheduledChecks = async (req: Request, res: Response) => {
   }
 
   try {
-    const activeMonitors = await prisma.monitor.findMany({
-      where: { isActive: true },
-    });
-
-    const now = new Date();
-    const dueMonitors = activeMonitors.filter((m: any) => {
-      if (!m.lastCheckedAt) return true;
-      const nextCheckTime = new Date(m.lastCheckedAt.getTime() + m.intervalMinutes * 60 * 1000);
-      return now >= nextCheckTime;
-    });
-
-    const checkPromises = dueMonitors.map((monitor: any) => runUptimeCheck(monitor));
-    const results = await Promise.all(checkPromises);
-
-    // Prune old logs (logs older than 30 days)
-    const prunedCount = await pruneOldPingLogs(30);
+    const result = await runDueUptimeChecks();
 
     return res.status(200).json({
       message: 'Uptime cron check run completed',
-      monitorsChecked: dueMonitors.length,
-      logsWritten: results.length,
-      logsPruned: prunedCount,
-      timestamp: now.toISOString(),
+      ...result,
     });
   } catch (err: any) {
     return res.status(500).json({ message: err.message || 'Internal server error' });

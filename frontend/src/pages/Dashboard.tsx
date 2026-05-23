@@ -145,16 +145,7 @@ export default function Dashboard() {
     setCronRunning(true);
     setCronResult(null);
     try {
-      // Calls local cron endpoint with dev secret
-      const res = await api.post(
-        '/internal/run-checks',
-        {},
-        {
-          headers: {
-            'x-cron-secret': 'dev_cron_secret_change_later',
-          },
-        }
-      );
+      const res = await api.post('/monitors/check-all');
       setCronResult(
         `Checked ${res.data.monitorsChecked} monitors. Logs written: ${res.data.logsWritten}. Logs pruned: ${res.data.logsPruned}.`
       );

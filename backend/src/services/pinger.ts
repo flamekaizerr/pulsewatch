@@ -1,8 +1,20 @@
-import { prisma } from '../config/database.js';
-import { cache } from '../config/redis.js';
-import { broadcastPingLog, broadcastStatusChange } from './socket.js';
-import { sendStatusAlert } from './alerter.js';
-import { Monitor, MonitorStatus, PingLog } from '@shared/types.js';
+import { prisma } from '../config/database';
+import { cache } from '../config/redis';
+import { broadcastPingLog, broadcastStatusChange } from './socket';
+import { sendStatusAlert } from './alerter';
+import type { Monitor, MonitorStatus, PingLog } from '@shared/types';
+
+type RunDueUptimeChecksOptions = {
+  userId?: string;
+  retentionDays?: number;
+};
+
+export type RunDueUptimeChecksResult = {
+  monitorsChecked: number;
+  logsWritten: number;
+  logsPruned: number;
+  timestamp: string;
+};
 
 export const runUptimeCheck = async (dbMonitor: any): Promise<PingLog> => {
   const start = Date.now();
@@ -93,6 +105,34 @@ export const runUptimeCheck = async (dbMonitor: any): Promise<PingLog> => {
   }
 
   return sharedLog;
+};
+
+export const runDueUptimeChecks = async (
+  options: RunDueUptimeChecksOptions = {}
+): Promise<RunDueUptimeChecksResult> => {
+  const activeMonitors = await prisma.monitor.findMany({
+    where: {
+      isActive: true,
+      ...(options.userId ? { userId: options.userId } : {}),
+    },
+  });
+
+  const now = new Date();
+  const dueMonitors = activeMonitors.filter((monitor: any) => {
+    if (!monitor.lastCheckedAt) return true;
+    const nextCheckTime = new Date(monitor.lastCheckedAt.getTime() + monitor.intervalMinutes * 60 * 1000);
+    return now >= nextCheckTime;
+  });
+
+  const results = await Promise.all(dueMonitors.map((monitor: any) => runUptimeCheck(monitor)));
+  const prunedCount = await pruneOldPingLogs(options.retentionDays ?? 30);
+
+  return {
+    monitorsChecked: dueMonitors.length,
+    logsWritten: results.length,
+    logsPruned: prunedCount,
+    timestamp: now.toISOString(),
+  };
 };
 
 // Clean logs older than 30 days (default retention)

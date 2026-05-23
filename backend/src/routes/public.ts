@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { getPublicStatus, runScheduledChecks, getDashboardStats } from '../controllers/public.js';
-import { requireAuth } from '../middlewares/auth.js';
+import { getPublicStatus, runScheduledChecks, getDashboardStats } from '../controllers/public';
+import { requireAuth } from '../middlewares/auth';
 
 const router = Router();
 

@@ -1,4 +1,4 @@
-import { Monitor, MonitorStatus } from '@shared/types.js';
+import type { Monitor, MonitorStatus } from '@shared/types';
 
 export const sendStatusAlert = async (monitor: Monitor, previousStatus: MonitorStatus, newStatus: MonitorStatus) => {
   const webhookUrl = process.env.DISCORD_WEBHOOK_URL;

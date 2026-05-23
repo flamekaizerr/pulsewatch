@@ -1,8 +1,8 @@
 import { Response } from 'express';
 import { z } from 'zod';
-import { prisma } from '../config/database.js';
-import { AuthenticatedRequest } from '../middlewares/auth.js';
-import { runUptimeCheck } from '../services/pinger.js';
+import { prisma } from '../config/database';
+import { AuthenticatedRequest } from '../middlewares/auth';
+import { runDueUptimeChecks, runUptimeCheck } from '../services/pinger';
 
 export const createMonitorSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -156,6 +156,21 @@ export const forceCheck = async (req: AuthenticatedRequest, res: Response) => {
       message: 'Uptime check executed successfully',
       log,
       status: monitor.status,
+    });
+  } catch (err: any) {
+    return res.status(500).json({ message: err.message || 'Internal server error' });
+  }
+};
+
+export const forceCheckAll = async (req: AuthenticatedRequest, res: Response) => {
+  if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
+
+  try {
+    const result = await runDueUptimeChecks({ userId: req.user.id });
+
+    return res.status(200).json({
+      message: 'Scheduled checks executed successfully',
+      ...result,
     });
   } catch (err: any) {
     return res.status(500).json({ message: err.message || 'Internal server error' });

@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
-import { prisma } from '../config/database.js';
-import { AuthenticatedRequest } from '../middlewares/auth.js';
+import { prisma } from '../config/database';
+import { AuthenticatedRequest } from '../middlewares/auth';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret_change_later';
 const isProd = process.env.NODE_ENV === 'production';

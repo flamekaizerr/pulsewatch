@@ -1,14 +1,17 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import authRoutes from './routes/auth.js';
-import monitorRoutes from './routes/monitor.js';
-import publicRoutes from './routes/public.js';
+import { isOriginAllowed } from './config/cors';
+import authRoutes from './routes/auth';
+import monitorRoutes from './routes/monitor';
+import publicRoutes from './routes/public';
 
 const app = express();
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    return callback(null, isOriginAllowed(origin));
+  },
   credentials: true,
 }));
 

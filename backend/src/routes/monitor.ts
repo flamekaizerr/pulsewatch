@@ -6,11 +6,12 @@ import {
   updateMonitor,
   deleteMonitor,
   forceCheck,
+  forceCheckAll,
   createMonitorSchema,
   updateMonitorSchema,
-} from '../controllers/monitor.js';
-import { requireAuth } from '../middlewares/auth.js';
-import { validateBody } from '../middlewares/validation.js';
+} from '../controllers/monitor';
+import { requireAuth } from '../middlewares/auth';
+import { validateBody } from '../middlewares/validation';
 
 const router = Router();
 
@@ -18,6 +19,7 @@ router.use(requireAuth);
 
 router.post('/', validateBody(createMonitorSchema), createMonitor);
 router.get('/', listMonitors);
+router.post('/check-all', forceCheckAll);
 router.get('/:id', getMonitor);
 router.patch('/:id', validateBody(updateMonitorSchema), updateMonitor);
 router.delete('/:id', deleteMonitor);
