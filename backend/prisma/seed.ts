@@ -41,13 +41,6 @@ async function main() {
       discordAlerts: false,
     },
     {
-      name: 'Portfolio Placeholder',
-      url: 'https://example.com',
-      intervalMinutes: 15,
-      timeoutMs: 5000,
-      discordAlerts: false,
-    },
-    {
       name: 'Backend Health Check',
       url: 'http://localhost:4000/health',
       intervalMinutes: 15,

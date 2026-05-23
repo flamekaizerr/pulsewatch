@@ -4,9 +4,10 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  schemas  = ["pulsewatch"]
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+  schemas   = ["pulsewatch"]
 }
 
 model User {
@@ -25,7 +26,7 @@ model Monitor {
   url             String
   status          String    @default("PENDING") // UP, DOWN, DEGRADED, PENDING
   intervalMinutes Int       @default(15)
-  timeoutMs       @default(5000)
+  timeoutMs       Int       @default(5000)
   isActive        Boolean   @default(true)
   userId          String
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
