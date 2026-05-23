@@ -1,0 +1,51 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["pulsewatch"]
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  monitors     Monitor[]
+
+  @@schema("pulsewatch")
+}
+
+model Monitor {
+  id              String    @id @default(uuid())
+  name            String
+  url             String
+  status          String    @default("PENDING") // UP, DOWN, DEGRADED, PENDING
+  intervalMinutes Int       @default(15)
+  timeoutMs       @default(5000)
+  isActive        Boolean   @default(true)
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  discordAlerts   Boolean   @default(false)
+  lastCheckedAt   DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  pingLogs        PingLog[]
+
+  @@schema("pulsewatch")
+}
+
+model PingLog {
+  id             String   @id @default(uuid())
+  monitorId      String
+  monitor        Monitor  @relation(fields: [monitorId], references: [id], onDelete: Cascade)
+  status         Int      // HTTP response code or error representation (-1 for error, -2 for timeout)
+  responseTimeMs Int
+  errorMsg       String?
+  createdAt      DateTime @default(now())
+
+  @@schema("pulsewatch")
+}

@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production / Builds
+dist/
+build/
+.vercel
+.render
+
+# Environment variables & secrets
+.env
+.env.local
+.env.production
+.env.development.local
+.env.test.local
+.env.production.local
+.env.test
+
+# IDE configs
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Testing logs/reports
+coverage/
+*.log
+
+# Local databases
+*.db
+*.db-journal
+sqlite.db
+
+# Compiled Shared TypeScript
+shared/*.js
+shared/*.js.map
+shared/*.d.ts
